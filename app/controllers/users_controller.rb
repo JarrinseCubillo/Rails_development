@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[new create]
-  before_action :set_user, only: %i[show]
+  before_action :set_user, only: %i[show edit destroy]
   
   def index
     @users = User.all
@@ -11,6 +11,8 @@ class UsersController < ApplicationController
   def new 
     @user = User.new
   end
+
+  def edit; end
 
   def create
     @user = User.new(user_params) 
@@ -24,6 +26,20 @@ class UsersController < ApplicationController
       
   end
 
+  def update
+    if @user.update(user_params)
+      redirect_to user_path(@user), notice: "User was updated"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+  
+  def destroy
+    session[:user_id] = nil if current_user == @user
+    @user.destroy
+    redirect_to users_path, notice: "User sucessfully deleted"
+  end
+  
   private
 
   def user_params
